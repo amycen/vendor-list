@@ -1,5 +1,5 @@
-import { StyleSheet } from 'aphrodite';
-import color from './color';
+import { StyleSheet } from "aphrodite";
+import color from "./color";
 
 const bp = 8;
 
@@ -9,7 +9,7 @@ export default function customStyleSheet(f) {
       f({
         color,
         bp,
-      }),
+      })
     ),
   };
 }

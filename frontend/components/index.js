@@ -1,3 +1,3 @@
-import { ViewVendor } from "./ViewVendor";
+import VendorTable from "./VendorTable";
 
-export { ViewVendor };
+export { VendorTable };

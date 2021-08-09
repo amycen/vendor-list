@@ -1,8 +1,8 @@
-import { ViewVendor } from "../components";
+import { VendorTable } from "../components";
 import React from "react";
 
 const Vendors = () => {
-  return <ViewVendor />;
+  return <VendorTable />;
 };
 
 export default Vendors;

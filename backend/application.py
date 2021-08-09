@@ -14,7 +14,8 @@ app.debug = True
 def index():
   return render_template(
     'index.html',
-    js_url='//localhost:8080/main.bundle.js'
+    js_url='//localhost:8080/main.bundle.js',
+    title="Interview app"
   )
 
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view(
@@ -22,6 +23,14 @@ app.add_url_rule('/graphql', view_func=GraphQLView.as_view(
   schema=schema,
   graphiql=True,
 ))
+
+@app.route('/vendors/')
+def vendors():
+  return render_template(
+    'index.html',
+    js_url='//localhost:8080/main.bundle.js',
+    title="Vendors"
+  )
 
 if __name__ == '__main__':
   app.run()

@@ -28,7 +28,15 @@ const styles = customStyleSheet(({ color, bp }) => ({
     height: "100vh",
     display: "flex",
     justifyContent: "center",
+    flexDirection: "column",
     alignItems: "center",
+  },
+  title: {
+    display: "flex",
+    alignItems: "center",
+  },
+  vendorButton: {
+    marginTop: "1.5rem",
   },
 }));
 
@@ -47,15 +55,19 @@ function Home() {
   // TODO: FIX BUTTON CSS
   return (
     <div className={css(styles.container)}>
-      <img
-        className={css(styles.logo)}
-        src={getImageUri(evergreenIcon)}
-        alt="logo"
-      />
-      <Text title1>{titleText}</Text>
-      <Link to="/vendors">
-        <Button color="default">View Vendors</Button>
-      </Link>
+      <div className={css(styles.title)}>
+        <img
+          className={css(styles.logo)}
+          src={getImageUri(evergreenIcon)}
+          alt="logo"
+        />
+        <Text title1>{titleText}</Text>
+      </div>
+      <div className={css(styles.vendorButton)}>
+        <Link to="/vendors">
+          <Button color="default">View Vendors</Button>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -32,7 +32,8 @@ const UPDATE_VENDORS_QUERY = gql`
 `;
 
 export const VendorTable = () => {
-  const { data } = useQuery(GET_VENDORS_QUERY);
+  const { data, loading } = useQuery(GET_VENDORS_QUERY);
+  if (loading) return <Text>loading...</Text>;
   const vendors = data && data.vendors;
   const [updateVendor] = useMutation(UPDATE_VENDORS_QUERY, {
     refetchQueries: [{ query: GET_VENDORS_QUERY }],
@@ -122,13 +123,11 @@ export const VendorTable = () => {
 
   return (
     <>
-      {vendors ? (
+      {vendors && (
         <table id="vendor-table">
           <thead>{header}</thead>
           <tbody>{content}</tbody>
         </table>
-      ) : (
-        <Text>Loading...</Text>
       )}
     </>
   );

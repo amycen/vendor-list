@@ -1,9 +1,8 @@
-import React, { useMemo } from "react";
-import { gql, useQuery } from "@apollo/client";
+import React, { useState, useMemo } from "react";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text } from "../lib";
 import { vendorTableColumns, VENDOR_OPTIONS } from "./../constants";
 import Select from "react-select";
-import { useState } from "react";
 
 const GET_VENDORS_QUERY = gql`
   query GetVendors {
@@ -20,23 +19,36 @@ const GET_VENDORS_QUERY = gql`
 `;
 
 const UPDATE_VENDORS_QUERY = gql`
-  mutation updateVendor($id: Int!, $name: String, $status: String) {
-    updateVendor(id: $id, name: $name, status: $status) {
+  mutation {
+    updateVendor(id: 2, name: "test") {
       ok
       vendor {
         id
         name
-        description
-        externalLink
-        status
-        category
-        risk
       }
     }
   }
 `;
+// const UPDATE_VENDORS_QUERY = gql`
+//   mutation updateVendor($id: Int!, $name: String, $status: String) {
+//     updateVendor(id: $id, name: $name, status: $status) {
+//       ok
+//       vendor {
+//         id
+//         name
+//         description
+//         externalLink
+//         status
+//         category
+//         risk
+//       }
+//     }
+//   }
+// `;
+
 export const VendorTable = () => {
   const { data } = useQuery(GET_VENDORS_QUERY);
+  const [updateVendor, { loading, error }] = useMutation(UPDATE_VENDORS_QUERY);
   const vendors = useMemo(() => data && data.vendors, [data]);
 
   const header = (
@@ -53,6 +65,7 @@ export const VendorTable = () => {
 
   const onChangeStatus = (selectedOption) => {
     console.log("status change...", selectedOption);
+    updateVendor();
   };
   const onSubmit = (id) => {
     // const rowId = e.target.parentNode.parentNode.id;

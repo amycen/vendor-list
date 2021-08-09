@@ -1,3 +1,11 @@
+export const vendorTableColumns = [
+  "Name",
+  "Description",
+  "Category",
+  "Status",
+  "Risk",
+];
+
 export const VENDOR_OPTIONS = {
   Status: [
     { value: 1, label: "Active" },

@@ -1,19 +1,8 @@
-import React, { useMemo } from "react";
-import BootstrapTable from "react-bootstrap-table-next";
-import cellEditFactory, { Type } from "react-bootstrap-table2-editor";
-import paginationFactory from "react-bootstrap-table2-paginator";
-import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
+import React from "react";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text } from "../lib";
-import { VENDOR_OPTIONS } from "./../constants";
-import { gql, useQuery } from "@apollo/client";
-import filterFactory, { selectFilter } from "react-bootstrap-table2-filter";
-import ToolkitProvider, {
-  Search,
-  CSVExport,
-} from "react-bootstrap-table2-toolkit";
-
-const { SearchBar } = Search;
-const { ExportCSVButton } = CSVExport;
+import { vendorTableColumns, VENDOR_OPTIONS } from "./../constants";
+import Select from "react-select";
 
 const GET_VENDORS_QUERY = gql`
   query GetVendors {
@@ -29,83 +18,118 @@ const GET_VENDORS_QUERY = gql`
   }
 `;
 
-const columns = [
-  {
-    dataField: "name",
-    text: "Vendor Name",
-    sort: true,
-  },
-  {
-    dataField: "description",
-    text: "Description",
-    editor: {
-      type: Type.TEXTAREA,
-    },
-  },
-  {
-    dataField: "category",
-    text: "Category",
-    editor: {
-      type: Type.SELECT,
-      options: VENDOR_OPTIONS.Category,
-    },
-  },
-  {
-    dataField: "status",
-    text: "Status",
-    editor: {
-      type: Type.SELECT,
-      options: VENDOR_OPTIONS.Status,
-    },
-    sort: true,
-  },
-  {
-    dataField: "risk",
-    text: "Risk",
-    editor: {
-      type: Type.SELECT,
-      options: VENDOR_OPTIONS.Risk,
-    },
-    sort: true,
-    // formatter: (cell) => VENDOR_OPTIONS.Risk[cell],
-    // filter: selectFilter({
-    //   options: VENDOR_OPTIONS.Risk,
-    // }),
-  },
-];
+const UPDATE_VENDORS_QUERY = gql`
+  mutation UpdateVendor($id: Int!, $category: String, $status: Int) {
+    updateVendor(id: $id, category: $category, status: $status) {
+      ok
+      vendor {
+        id
+        status
+        category
+      }
+    }
+  }
+`;
 
-const VendorTable = () => {
+export const VendorTable = () => {
   const { data } = useQuery(GET_VENDORS_QUERY);
-  const vendors = useMemo(() => data && data.vendors, [data]);
+  const vendors = data && data.vendors;
+  const [updateVendor] = useMutation(UPDATE_VENDORS_QUERY, {
+    refetchQueries: [{ query: GET_VENDORS_QUERY }],
+  });
+
+  const findOptionByValue = (options, value) => {
+    return options.find((option) => option.value === value);
+  };
+
+  //TODO: form validation & error handling
+  const onChangeOption = (id, name, option) => {
+    const { value } = option;
+    updateVendor({ variables: { id, [name]: value } });
+  };
+
+  const header = (
+    <tr>
+      {vendorTableColumns.map((column) => (
+        <th key={column}>{column}</th>
+      ))}
+    </tr>
+  );
+
+  const content =
+    vendors &&
+    vendors.map((vendor) => {
+      const {
+        id,
+        name,
+        description,
+        externalLink,
+        status,
+        category,
+        risk,
+      } = vendor;
+      //TODO: add hover
+      const shortenDescription =
+        description.length > 100
+          ? description.substring(0, 150) + "..."
+          : description;
+      const categoryValue = findOptionByValue(
+        VENDOR_OPTIONS.Category,
+        category
+      );
+      const statusValue = findOptionByValue(VENDOR_OPTIONS.Status, status);
+      const riskValue = findOptionByValue(VENDOR_OPTIONS.Risk, risk);
+      return (
+        <tr key={id}>
+          <td>
+            <a href={externalLink}>{name}</a>
+          </td>
+          <td className="tooltip-comment">
+            {shortenDescription}
+            <span className="tooltip">{description}</span>
+          </td>
+          <td>
+            <div style={{ width: 200 }}>
+              <Select
+                value={categoryValue}
+                options={VENDOR_OPTIONS.Category}
+                onChange={(option) => onChangeOption(id, "category", option)}
+              />
+            </div>
+          </td>
+          <td>
+            <div style={{ width: 100 }}>
+              <Select
+                value={statusValue}
+                options={VENDOR_OPTIONS.Status}
+                onChange={(option) => onChangeOption(id, "status", option)}
+                width="100px"
+              />
+            </div>
+          </td>
+          <td>
+            <div style={{ width: 100 }}>
+              <Select
+                value={riskValue}
+                options={VENDOR_OPTIONS.Risk}
+                onChange={(option) => onChangeOption(id, "risk", option)}
+              />
+            </div>
+          </td>
+        </tr>
+      );
+    });
+
   return (
     <>
       {vendors ? (
-        <ToolkitProvider
-          keyField="id"
-          data={vendors}
-          columns={columns}
-          search
-          cellEdit={cellEditFactory({ mode: "click", blurToSave: true })}
-          pagination={paginationFactory()}
-          //   filter={filterFactory()}
-          exportCSV
-        >
-          {(props) => (
-            <div>
-              <SearchBar {...props.searchProps} />
-              <ExportCSVButton {...props.csvProps}>
-                Export to CSV
-              </ExportCSVButton>
-              <hr />
-              <BootstrapTable {...props.baseProps} />
-            </div>
-          )}
-        </ToolkitProvider>
+        <table id="vendor-table">
+          <thead>{header}</thead>
+          <tbody>{content}</tbody>
+        </table>
       ) : (
-        <Text>loading...</Text>
+        <Text>Loading...</Text>
       )}
     </>
   );
 };
-
-export default VendorTable;

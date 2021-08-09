@@ -4,7 +4,8 @@ import React from "react";
 const Vendors = () => {
   return (
     <div id="table-container">
-      <VendorTable />;
+      <h3>Browse Vendors</h3>
+      <VendorTable />
     </div>
   );
 };

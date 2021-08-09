@@ -3,6 +3,7 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text } from "../lib";
 import { vendorTableColumns, VENDOR_OPTIONS } from "./../constants";
 import Select from "react-select";
+import { useEffect } from "react";
 
 const GET_VENDORS_QUERY = gql`
   query GetVendors {
@@ -19,37 +20,24 @@ const GET_VENDORS_QUERY = gql`
 `;
 
 const UPDATE_VENDORS_QUERY = gql`
-  mutation {
-    updateVendor(id: 2, name: "test") {
+  mutation UpdateVendor($id: Int!, $category: String, $status: Int) {
+    updateVendor(id: $id, category: $category, status: $status) {
       ok
       vendor {
         id
-        name
+        status
+        category
       }
     }
   }
 `;
-// const UPDATE_VENDORS_QUERY = gql`
-//   mutation updateVendor($id: Int!, $name: String, $status: String) {
-//     updateVendor(id: $id, name: $name, status: $status) {
-//       ok
-//       vendor {
-//         id
-//         name
-//         description
-//         externalLink
-//         status
-//         category
-//         risk
-//       }
-//     }
-//   }
-// `;
 
 export const VendorTable = () => {
   const { data } = useQuery(GET_VENDORS_QUERY);
-  const [updateVendor, { loading, error }] = useMutation(UPDATE_VENDORS_QUERY);
-  const vendors = useMemo(() => data && data.vendors, [data]);
+  const vendors = data && data.vendors;
+  const [updateVendor] = useMutation(UPDATE_VENDORS_QUERY, {
+    refetchQueries: [{ query: GET_VENDORS_QUERY }],
+  });
 
   const header = (
     <tr>
@@ -63,14 +51,10 @@ export const VendorTable = () => {
     return options.find((option) => option.value === value);
   };
 
-  const onChangeStatus = (selectedOption) => {
-    console.log("status change...", selectedOption);
-    updateVendor();
-  };
-  const onSubmit = (id) => {
-    // const rowId = e.target.parentNode.parentNode.id;
-    const data = document.getElementById(id);
-    console.log(data);
+  //TODO: form validation & error handling
+  const onChangeOption = (id, name, option) => {
+    const { value } = option;
+    updateVendor({ variables: { id, [name]: value } });
   };
 
   const content =
@@ -98,20 +82,25 @@ export const VendorTable = () => {
           </td>
           <td>{description}</td>
           <td>
-            <Select value={categoryValue} options={VENDOR_OPTIONS.Category} />
+            <Select
+              value={categoryValue}
+              options={VENDOR_OPTIONS.Category}
+              onChange={(option) => onChangeOption(id, "category", option)}
+            />
           </td>
           <td>
             <Select
               value={statusValue}
               options={VENDOR_OPTIONS.Status}
-              onChange={onChangeStatus}
+              onChange={(option) => onChangeOption(id, "status", option)}
             />
           </td>
           <td>
-            <Select value={riskValue} options={VENDOR_OPTIONS.Risk} />
-          </td>
-          <td>
-            <button onClick={() => onSubmit(id)}>Save Changes</button>
+            <Select
+              value={riskValue}
+              options={VENDOR_OPTIONS.Risk}
+              onChange={(option) => onChangeOption(id, "risk", option)}
+            />
           </td>
         </tr>
       );

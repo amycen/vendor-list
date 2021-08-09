@@ -4,7 +4,6 @@ export const vendorTableColumns = [
   "Category",
   "Status",
   "Risk",
-  "Manage",
 ];
 
 export const VENDOR_OPTIONS = {

@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text } from "../lib";
 import { vendorTableColumns, VENDOR_OPTIONS } from "./../constants";
 import Select from "react-select";
-import { useEffect } from "react";
 
 const GET_VENDORS_QUERY = gql`
   query GetVendors {
@@ -39,14 +38,6 @@ export const VendorTable = () => {
     refetchQueries: [{ query: GET_VENDORS_QUERY }],
   });
 
-  const header = (
-    <tr>
-      {vendorTableColumns.map((column) => (
-        <th key={column}>{column}</th>
-      ))}
-    </tr>
-  );
-
   const findOptionByValue = (options, value) => {
     return options.find((option) => option.value === value);
   };
@@ -56,6 +47,14 @@ export const VendorTable = () => {
     const { value } = option;
     updateVendor({ variables: { id, [name]: value } });
   };
+
+  const header = (
+    <tr>
+      {vendorTableColumns.map((column) => (
+        <th key={column}>{column}</th>
+      ))}
+    </tr>
+  );
 
   const content =
     vendors &&
@@ -69,6 +68,11 @@ export const VendorTable = () => {
         category,
         risk,
       } = vendor;
+      //TODO: add hover
+      const shortenDescription =
+        description.length > 100
+          ? description.substring(0, 150) + "..."
+          : description;
       const categoryValue = findOptionByValue(
         VENDOR_OPTIONS.Category,
         category
@@ -80,27 +84,37 @@ export const VendorTable = () => {
           <td>
             <a href={externalLink}>{name}</a>
           </td>
-          <td>{description}</td>
-          <td>
-            <Select
-              value={categoryValue}
-              options={VENDOR_OPTIONS.Category}
-              onChange={(option) => onChangeOption(id, "category", option)}
-            />
+          <td className="tooltip-comment">
+            {shortenDescription}
+            <span className="tooltip">{description}</span>
           </td>
           <td>
-            <Select
-              value={statusValue}
-              options={VENDOR_OPTIONS.Status}
-              onChange={(option) => onChangeOption(id, "status", option)}
-            />
+            <div style={{ width: 200 }}>
+              <Select
+                value={categoryValue}
+                options={VENDOR_OPTIONS.Category}
+                onChange={(option) => onChangeOption(id, "category", option)}
+              />
+            </div>
           </td>
           <td>
-            <Select
-              value={riskValue}
-              options={VENDOR_OPTIONS.Risk}
-              onChange={(option) => onChangeOption(id, "risk", option)}
-            />
+            <div style={{ width: 100 }}>
+              <Select
+                value={statusValue}
+                options={VENDOR_OPTIONS.Status}
+                onChange={(option) => onChangeOption(id, "status", option)}
+                width="100px"
+              />
+            </div>
+          </td>
+          <td>
+            <div style={{ width: 100 }}>
+              <Select
+                value={riskValue}
+                options={VENDOR_OPTIONS.Risk}
+                onChange={(option) => onChangeOption(id, "risk", option)}
+              />
+            </div>
           </td>
         </tr>
       );
@@ -109,7 +123,7 @@ export const VendorTable = () => {
   return (
     <>
       {vendors ? (
-        <table>
+        <table id="vendor-table">
           <thead>{header}</thead>
           <tbody>{content}</tbody>
         </table>

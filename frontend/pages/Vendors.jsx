@@ -14,17 +14,23 @@ const styles = customStyleSheet(({ color }) => ({
   },
   header: {
     height: "20vh",
+    marginTop: "30px",
   },
   vendorTable: {
     height: "70vh",
     width: "85vw",
+    marginTop: "30px",
+    display: "flex",
+    justifyContent: "center",
   },
 }));
 
 function Vendors() {
   return (
     <div className={css(styles.container)}>
-      <div className={css(styles.header)}>Browse Vendors</div>
+      <div className={css(styles.header)}>
+        <h2>Browse Vendors</h2>
+      </div>
       <div className={css(styles.vendorTable)}>
         <VendorTable />
       </div>

@@ -1,4 +1,3 @@
-from typing import Optional
 import graphene
 from graphene import ObjectType, String, Schema
 from graphene_sqlalchemy import SQLAlchemyObjectType
@@ -35,11 +34,11 @@ class Query(ObjectType):
 
   def resolve_vendor(root, info, id):
     query = Vendor.get_query(info)
-    return query.filter(UserModel.id == id).first()
+    return query.filter(VendorModel.id == id).first()
 
 class UpdateVendor(graphene.Mutation):
   class Arguments:
-    id = graphene.String(required=True)
+    id = graphene.Int(required=True)
     name = graphene.String()
     risk = graphene.String()
     category = graphene.String()
@@ -48,9 +47,9 @@ class UpdateVendor(graphene.Mutation):
   ok = graphene.Boolean()
   vendor = graphene.Field(Vendor)
 
-  def mutate(self, info, id, name: Optional[str]==None, risk: Optional[str]==None, category: Optional[str]==None,status: Optional[str]==None):
+  def mutate(self, info, id, name=None, risk=None, category=None, status=None):
     query = Vendor.get_query(info)
-    vendor = query.filter(Vendor.id == id).first()
+    vendor = query.filter(VendorModel.id == id).first()
     if not vendor:
       ok = False
     else:
@@ -62,11 +61,13 @@ class UpdateVendor(graphene.Mutation):
         vendor.category = category
       if status:
         vendor.status = status
+    print(vendor)
+    db_session.add(vendor)
     db_session.commit()
     ok = True
-    vendor = vendor
     return UpdateVendor(vendor=vendor, ok=ok)
 
 class Mutation(ObjectType):
   updateVendor = UpdateVendor.Field()
-schema = Schema(query=Query)
+
+schema = Schema(query=Query, mutation=Mutation)

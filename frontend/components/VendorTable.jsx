@@ -26,16 +26,17 @@ const UPDATE_VENDORS_QUERY = gql`
         id
         status
         category
+        risk
       }
     }
   }
 `;
 
 export const VendorTable = () => {
-  const { data, loading } = useQuery(GET_VENDORS_QUERY);
-  if (loading) return <Text>loading...</Text>;
+  const { data } = useQuery(GET_VENDORS_QUERY);
   const vendors = data && data.vendors;
-  const [updateVendor] = useMutation(UPDATE_VENDORS_QUERY, {
+  //TODO: handle local update on changed row instead of refetch all
+  const [updateVendor, { loading }] = useMutation(UPDATE_VENDORS_QUERY, {
     refetchQueries: [{ query: GET_VENDORS_QUERY }],
   });
 
@@ -44,6 +45,7 @@ export const VendorTable = () => {
   };
 
   //TODO: form validation & error handling
+  //      handle individual loading/disable
   const onChangeOption = (id, name, option) => {
     const { value } = option;
     updateVendor({ variables: { id, [name]: value } });
@@ -95,25 +97,28 @@ export const VendorTable = () => {
                 value={categoryValue}
                 options={VENDOR_OPTIONS.Category}
                 onChange={(option) => onChangeOption(id, "category", option)}
+                isDisabled={loading}
               />
             </div>
           </td>
           <td>
-            <div style={{ width: 100 }}>
+            <div style={{ width: 120 }}>
               <Select
                 value={statusValue}
                 options={VENDOR_OPTIONS.Status}
                 onChange={(option) => onChangeOption(id, "status", option)}
                 width="100px"
+                isDisabled={loading}
               />
             </div>
           </td>
           <td>
-            <div style={{ width: 100 }}>
+            <div style={{ width: 120 }}>
               <Select
                 value={riskValue}
                 options={VENDOR_OPTIONS.Risk}
                 onChange={(option) => onChangeOption(id, "risk", option)}
+                isDisabled={loading}
               />
             </div>
           </td>
@@ -123,11 +128,13 @@ export const VendorTable = () => {
 
   return (
     <>
-      {vendors && (
-        <table id="vendor-table">
+      {vendors ? (
+        <table>
           <thead>{header}</thead>
           <tbody>{content}</tbody>
         </table>
+      ) : (
+        <Text>loading...</Text>
       )}
     </>
   );

@@ -24,7 +24,7 @@ app.add_url_rule('/graphql', view_func=GraphQLView.as_view(
   graphiql=True,
 ))
 
-@app.route('/vendors/')
+@app.route('/vendors')
 def vendors():
   return render_template(
     'index.html',
